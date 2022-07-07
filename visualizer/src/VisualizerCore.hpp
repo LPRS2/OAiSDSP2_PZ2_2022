@@ -24,11 +24,13 @@ struct pkg__img__show {
 };
 
 struct pkg__plot__plot {
-	string path;
+	std::string path;
 	unsigned idx;
 	const std::vector<double>* x;
 	const std::vector<double>* y;
 	std::string label;
+    std::string color;
+    int style;
 };
 
 struct pkg__slider__slider {
@@ -52,7 +54,7 @@ struct sliders_stuff {
 };
 extern sliders_stuff s;
 
-// TODO create template class PathMap po uzoru na imageContainer here. 
+
 template <class T> 
 class PathMap {
 public:
@@ -124,7 +126,9 @@ private:
 		unsigned idx,
 		const std::vector<double>& x,
 		const std::vector<double>& y,
-		const std::string& label
+		const std::string& label,
+        const std::string& color,
+        const int& style
 	);
 
 };

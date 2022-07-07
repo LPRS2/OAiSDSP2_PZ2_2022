@@ -1,6 +1,5 @@
 
 #include "Enums.hpp"
-
 #include <visualizer.hpp>
 
 #include <iostream>
@@ -12,7 +11,51 @@ using namespace std;
 #define DEBUG(x) do{ std::cout << #x << " = " << x << std::endl; }while(0)
 
 #include "opencv2/opencv.hpp"
+
+
 using namespace cv;
+
+// TODO sube gde ovo da stavimo?
+class PlotHelper {
+public:
+    PlotHelper(
+        const std::string& path
+    ) {
+        curr_index = 0;
+        this->path = path;
+    }
+
+    void plot(
+        const std::vector<double>& xCoo,
+        const std::vector<double>& yCoo,
+        const std::string& legendTitle,
+        const std::string& color,
+        const int& style
+    ) {
+        visualizer::plot::plot(
+            this->path,
+            this->curr_index++,
+            xCoo,
+            yCoo,
+            legendTitle,
+            color, 
+            style
+        );
+    }
+
+private:
+    unsigned int curr_index;
+    std::string path;
+};
+
+enum LineStyle {
+    none, 
+    line,
+    stepLeft,
+    stepRight, 
+    stepCenter, 
+    impulse
+};
 
 int main() {
 	Mat src = cv::imread("data/stop_sign.jpg");
@@ -63,6 +106,38 @@ int main() {
 		"r",
 		src2
 	);
+
+	std::cout << "Testing plot function" << std::endl;
+
+	const std::vector<double> xAx = {0, 1, 2, 3, 4};
+	const std::vector<double> yAx = {0, 1, 2, 3, 4};
+
+    const std::vector<double> xAx2 = {3, 5, 7, 9, 11};
+	const std::vector<double> yAx2 = {0, 1, 2, 3, 4};
+
+    const std::vector<double> xAx3 = {0, 5, 10, 15, 20};
+	const std::vector<double> yAx3 = {0, 1, 2, 3, 4};
+
+    const std::vector<double> xAx4 = {0, 1, 2, 3, 4};
+	const std::vector<double> yAx4 = {8, 12, 16, 20, 24};
+
+    std::vector<double> sinx;
+    std::vector<double> siny;
+
+    for (int i = 0; i < 100; i++) {
+        sinx.push_back(i);
+        siny.push_back(sin(i));
+    }
+
+    PlotHelper plot1("test");
+    
+    // line formats: none, line, stepLeft, stepRight, stepCenter, impulse 0-5
+    plot1.plot(sinx, siny, "test1", "red", LineStyle::impulse);
+    plot1.plot(sinx, siny, "test2", "green", LineStyle::line);
+    plot1.plot(sinx, siny, "test3", "blue", LineStyle::stepCenter);
+    plot1.plot(sinx, siny, "test4", "cyan", LineStyle::stepRight);
+   
+
 
 	int th_start_h0;
 

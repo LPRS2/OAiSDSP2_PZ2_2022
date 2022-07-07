@@ -47,7 +47,6 @@ VisualizerCore::VisualizerCore() {
 	//imageContainer = ImageContainer();
 }
 
-
 template <class T> PathMap<T>::PathMap() {
 
 }
@@ -165,7 +164,9 @@ void VisualizerCore::processRequests() {
 			p.idx,
 			*p.x,
 			*p.y,
-			p.label
+			p.label,
+            p.color,
+            p.style
 		);
 	}
 
@@ -352,6 +353,9 @@ void VisualizerCore::recursive_tree_build(
 		//auto st = path_to_slider.ambiguity(vect);
 
 	}else if(type == "plot"){
+        DEBUG(QCPGraph::lsImpulse);
+        
+
 		auto plot = new QCustomPlot();
 		//TODO plot->setText(QString::fromStdString(name));
 		DEBUG(plot);
@@ -365,9 +369,11 @@ void VisualizerCore::recursive_tree_build(
 			cout << "To implement: " << type << endl;
 		}
 
+		//enable dragging with mouse and zooming with mouse wheel
 		plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
 
 		plot->setLocale(QLocale(QLocale::English, QLocale::UnitedKingdom)); // period as decimal separator and comma as thousand separator
+
 		plot->legend->setVisible(true);
 		/*
 		TODO
@@ -379,26 +385,78 @@ void VisualizerCore::recursive_tree_build(
 		// by default, the legend is in the inset layout of the main axis rect. So this is how we access it to change legend placement:
 		plot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignBottom|Qt::AlignRight);
 
+
+
 		int line_width = 3;
 		// Hardcoded.
-		plot->addGraph();
-		plot->graph(0)->setPen(QPen(Qt::red, line_width));
-		plot->graph(0)->setLineStyle(QCPGraph::lsLine);
 
-		plot->addGraph();
-		plot->graph(1)->setPen(QPen(Qt::green, line_width));
-		plot->graph(1)->setLineStyle(QCPGraph::lsLine);
+		//adds graph to plot, repeat this line to make multiple graphs in one plot
+		//TODO
+		//there must be one graph added so it can be indexed
+		//find way to make multiple graphs in same plot 
+		//make plot title appear at the top of the plot
+		//make different colors, make change in yaml also
+		//make range for the graph, add min and max in yaml, read it here
+		//make legend to appear at the bottom or at the top of the plot
+		//make easier customization
+		//find way to plot some data 
 
-		plot->addGraph();
-		plot->graph(2)->setPen(QPen(Qt::blue, line_width));
-		plot->graph(2)->setLineStyle(QCPGraph::lsLine);
+		//adds one graph, for multiple graphs at the same plot call this function multiple times
+		//
+		// plot->addGraph();
 
-		plot->addGraph();
-		plot->graph(3)->setPen(QPen(Qt::magenta, line_width));
-		plot->graph(3)->setLineStyle(QCPGraph::lsLine);
+		//Adding title at the top, change if needed
+		QCPTextElement *title = new QCPTextElement(plot);
+		title->setText(QString::fromStdString(y["title"].as<string>()));
+		plot->plotLayout()->insertRow(0);
+		plot->plotLayout()->addElement(0, 0, title);
 
-		plot->xAxis->setRange(0, 100);
-		plot->yAxis->setRange(0, 1000);
+		//addElement(row, col, elementToAdd)
+
+		//making legend
+		QCPTextElement *graphLegend = new QCPTextElement(plot);
+		graphLegend->setLayer(plot->legend->layer());
+		graphLegend->setText(QString::fromStdString(y["legend"].as<string>()));
+
+		//making legend appear out of the graph
+		//add new layout for legendploter(QCPLegend::foColumnsFirst);
+		plot->plotLayout()->setRowStretchFactor(1, 0.001);
+
+		//set range for x and y axis
+		//this one works fine
+		plot->xAxis->setRange(
+			std::stod(y["minvalx"].as<string>()), 
+			std::stod(y["maxvalx"].as<string>())
+		);
+
+		//this one does not work, but why?
+		plot->yAxis->setRange(
+			std::stod(y["minvaly"].as<string>()), 
+			std::stod(y["minvaly"].as<string>())
+		);
+
+		std::cout << y["minvaly"].as<string>() << " " << y["maxvaly"].as<string>() << std::endl;
+
+		//TODO	
+		//delete hardcoded
+		// plot->addGraph();
+		// plot->graph(0)->setPen(QPen(Qt::red, line_width));
+		// plot->graph(0)->setLineStyle(QCPGraph::lsLine);
+
+		// plot->addGraph();
+		// plot->graph(1)->setPen(QPen(Qt::green, line_width));
+		// plot->graph(1)->setLineStyle(QCPGraph::lsLine);
+
+		// plot->addGraph();
+		// plot->graph(2)->setPen(QPen(Qt::blue, line_width));
+		// plot->graph(2)->setLineStyle(QCPGraph::lsLine);
+
+		// plot->addGraph();
+		// plot->graph(3)->setPen(QPen(Qt::magenta, line_width));
+		// plot->graph(3)->setLineStyle(QCPGraph::lsLine);
+
+		/*plot->xAxis->setRange(0, 100);
+		plot->yAxis->setRange(0, 1000);*/
 
 		plot->replot();
 	}else{
@@ -440,48 +498,36 @@ void VisualizerCore::load_cfg(
 }
 
 
+
 void VisualizerCore::plot__plot(
 	const std::string& path,
 	unsigned idx,
 	const std::vector<double>& x,
 	const std::vector<double>& y,
-	const std::string& label
+	const std::string& label,
+    const std::string& color,
+    const int& style
 ) {
-	// if(path_to_plot.count(path)){
-	// 	auto plot = path_to_plot.at(path);
-
-	// 	plot->graph(idx)->setData(
-	// 		QVector<double>::fromStdVector(x),
-	// 		QVector<double>::fromStdVector(y)
-	// 	);
-	// 	plot->graph(idx)->setName(
-	// 		QString::fromStdString(label)
-	// 	);
-	// 	plot->replot();
-	// }
 	auto vect = path_to_plot.search(path);
 	
-	auto st = path_to_plot.ambiguity(vect); //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	auto st = path_to_plot.ambiguity(vect); 
 	std::cout << path_to_plot.ambiguity(vect) << std::endl;
 	if (vect.size()) {
 		auto plot = vect.front().second;
+        auto clr = new QColor(QString::fromStdString(color));
+        auto brush = new QBrush(*clr);
+
+        plot->addGraph();
+		plot->graph(idx)->setPen(QPen(*brush, 3));
+		plot->graph(idx)->setLineStyle((QCPGraph::LineStyle)style);
 
 		plot->graph(idx)->setData(
 			QVector<double>::fromStdVector(x),
 			QVector<double>::fromStdVector(y)
 		);
- //0:
-	// 		std::cout << "no match in " << vect.front().first << std::endl;
-	// 		break;
-	// 	case 1:
-	// 		std::cout << "match" << std::endl;
-	// 		break;
-	// 	default:
-	// 		std::cout << "ambiguity:" << std::endl;
-	// 		for (auto const& x: vect) {
-	// 			std::cout << "\t" << x.first << std::endl;
-	// 		}
-	// 		break;
-	// 
-	}
+        plot->graph(idx)->setName(
+            QString::fromStdString(label)
+        );
+        plot->replot();
+    }
 }

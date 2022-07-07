@@ -105,3 +105,28 @@ windows:
                name: h
                type: image
                src: data/1l.jpg
+  -
+    name: graph
+    type: layout
+    orientation: horiz
+    children: 
+      -
+        name: test
+        type: plot  
+        title: test_title
+        legend: test_legend_title #might need some children if there is multiple graphs on one plot
+        minvalx: -12
+        maxvalx: 100
+        minvaly: 0
+        maxvaly: 100
+#da li ce raditi sa komentarom ovde
+#windows:
+#  -
+#    name: win1
+#    type: layout
+#    orientation: vert
+#    children:
+#      -
+#        name: uniquename
+#        type: image
+#        src: data/l2.jpg

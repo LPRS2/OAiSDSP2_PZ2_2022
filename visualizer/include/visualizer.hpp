@@ -34,10 +34,12 @@ namespace visualizer {
 		void clear();
 		void plot(
 			const std::string& path,
-			unsigned idx, //TODO Remove.
+			unsigned idx, //TODO Remove. NE!
 			const std::vector<double>& x,
 			const std::vector<double>& y,
-			const std::string& label
+			const std::string& label,
+            const std::string& color,
+            const int& style
 		);
 	}
 

@@ -127,6 +127,8 @@ struct SliderStruct {
 };
 static map<string, SliderStruct> sliders;
 
+#include "qcustomplot.h"
+
 namespace visualizer {
 	void load_cfg(
 		const std::string& fn
@@ -179,7 +181,9 @@ namespace visualizer {
 			unsigned idx,
 			const std::vector<double>& x,
 			const std::vector<double>& y,
-			const std::string& label
+			const std::string& label,
+            const std::string& color,
+            const int& style
 		) {
 			pkg__plot__plot p;
 			p.path = path;
@@ -187,6 +191,8 @@ namespace visualizer {
 			p.x = &x;
 			p.y = &y;
 			p.label = label;
+            p.color = color;
+            p.style = (QCPGraph::LineStyle)style;
 			lock_guard<mutex> guard(q.mux);
 			q.plot__plot.push(p);
 		}
