@@ -15,9 +15,6 @@
 #include "ImageViewerWithSelecter.hpp"
 #include "Slider.hpp"
 
-//for debug
-#include <unistd.h>
-
 
 class Starter {
 	std::thread* t;
@@ -105,7 +102,6 @@ template <class T> std::string PathMap<T>::ambiguity(
 }
 
 
-
 void VisualizerCore::processRequests() {
 	lock_guard<mutex> guard(q.mux);
 	while(!q.load_cfg.empty()){
@@ -117,44 +113,13 @@ void VisualizerCore::processRequests() {
 		auto p = q.img__show.front();
 		q.img__show.pop();
 
-		// std::queue<string> satisf;
-		// // TODO use ImageContainer instead
-		// for(auto const& x: path_to_img_viewer){
-		// 	string full_path = x.first;
-		// 	if(endsWith(full_path, p.path)){
-		// 		// TODO use ImageContainer instead
-		// 		auto img_viewer = path_to_img_viewer.at(full_path);
-		// 		// TODO QImage::Format_BGR888 in Qt v5.14
-		// 		QImage img(p.pix, p.width, p.height, p.B_per_line, QImage::Format_RGB888);
-		// 		QImage img2 = img.rgbSwapped();
-		// 		img_viewer->setImage(img2);
-		// 		satisf.push(full_path);
-		// 	}
-		// }
-
 		auto vect = path_to_img_viewer.search(p.path);
 		auto img_viewer = vect.front().second;
 		QImage img(p.pix, p.width, p.height, p.B_per_line, QImage::Format_RGB888);
 		QImage img2 = img.rgbSwapped();
 		img_viewer->setImage(img2);
 		// ambiguity check
-		/*switch(vect.size()) {
-			case 0:
-				std::cout << "no match in " << vect.front().first << std::endl;
-				break;
-			case 1:
-				std::cout << "match" << std::endl;
-				break;
-			default:
-				std::cout << "ambiguity:" << std::endl;
-				for (auto const& x: vect) {
-					std::cout << "\t" << x.first << std::endl;
-				}
-				break;
-		}*/
 		std::cout << path_to_img_viewer.ambiguity(vect) << std::endl;
-
-
 	}
 	while(!q.plot__plot.empty()){
 		auto p = q.plot__plot.front();
@@ -174,10 +139,6 @@ void VisualizerCore::processRequests() {
 		auto p = q.slider__slider.front();
 		q.slider__slider.pop();
 
-		// if(path_to_slider.count(p.path)){
-		// 	auto slider = path_to_slider.at(p.path);
-		// 	slider->setValue(p.value_to_set);
-		// }
 		auto vec = path_to_slider.search(p.path);
 		if (vec.size()) {
 			auto slider = vec.front().second;
@@ -186,11 +147,6 @@ void VisualizerCore::processRequests() {
 		std::cout << path_to_slider.ambiguity(vec) << std::endl;
 	}
 }
-
-
-//TODO Add to class.
-
-//TODO static map<string, string> path_shortucts;
 
 
 void VisualizerCore::recursive_tree_build(
@@ -202,35 +158,7 @@ void VisualizerCore::recursive_tree_build(
 	auto type = y["type"].as<string>();
 	auto name = y["name"].as<string>();
 	string path = parent_path + "/" + name;
-    // std::cout << "type = " << type << std::endl;
-	// DEBUG(type);
-    // DEBUG(path);
-	/*if(type == "vert"){
-		auto layout = new QVBoxLayout();
 
-		if(l_parent){
-			l_parent->addLayout(layout);
-		}else if(w_parent){
-			w_parent->setLayout(layout);
-		}
-
-		for(auto cy : y["children"]){
-			recursive_tree_build(cy, path, w_parent, layout);
-		}
-	}else if(type == "horiz"){
-
-		auto layout = new QHBoxLayout();
-
-		if(l_parent){
-			l_parent->addLayout(layout);
-		}else if(w_parent){
-			w_parent->setLayout(layout);
-		}
-
-		for(auto cy : y["children"]){
-			recursive_tree_build(cy, path, w_parent, layout);
-		}
-	}*/
     if(type == "layout"){
         string orientation_str = (y["orientation"].as<string>());    
         if(orientation_str == "vert"){
@@ -279,30 +207,8 @@ void VisualizerCore::recursive_tree_build(
 	}else if(type == "image"){
 		auto img_viewer = new ImageViewerWithSelecter();
 		img_viewer->setText(QString::fromStdString(name));
-		//todo ovde
-		//prolazis kroz path_to_img_viewer[path] kljuceve i trazis da li se poklapa sa
 		
-		// TODO use ImageContainer instead
-		
-		//imageContainer.add(path, img_viewer);
-		//path_to_img_viewer[path] = img_viewer;
 		path_to_img_viewer.add(path, img_viewer);
-
-        // if(y["src"]) { 
-        //     string src = y["src"].as<string>();
-
-        //     char buff[1024]; //create string buffer to hold path
-        //     getcwd(buff, FILENAME_MAX);
-        //     string cu_wo_dir(buff);
-
-        //     std::cout << "path= " <<  cu_wo_dir + "/" + src << std::endl;
-            
-        //     QString qPath = QString::fromStdString(cu_wo_dir + "/" + src);
-        //     QImage *img = new QImage(qPath);
-        //     img_viewer->setImage(*img);
-        // }else{
-        //     std::cout << "no src pic included" << std::endl;
-        // }
 
 		if(l_parent){
 			l_parent->addWidget(img_viewer);
@@ -432,31 +338,8 @@ void VisualizerCore::recursive_tree_build(
 		//this one does not work, but why?
 		plot->yAxis->setRange(
 			std::stod(y["minvaly"].as<string>()), 
-			std::stod(y["minvaly"].as<string>())
+			std::stod(y["maxvaly"].as<string>())
 		);
-
-		std::cout << y["minvaly"].as<string>() << " " << y["maxvaly"].as<string>() << std::endl;
-
-		//TODO	
-		//delete hardcoded
-		// plot->addGraph();
-		// plot->graph(0)->setPen(QPen(Qt::red, line_width));
-		// plot->graph(0)->setLineStyle(QCPGraph::lsLine);
-
-		// plot->addGraph();
-		// plot->graph(1)->setPen(QPen(Qt::green, line_width));
-		// plot->graph(1)->setLineStyle(QCPGraph::lsLine);
-
-		// plot->addGraph();
-		// plot->graph(2)->setPen(QPen(Qt::blue, line_width));
-		// plot->graph(2)->setLineStyle(QCPGraph::lsLine);
-
-		// plot->addGraph();
-		// plot->graph(3)->setPen(QPen(Qt::magenta, line_width));
-		// plot->graph(3)->setLineStyle(QCPGraph::lsLine);
-
-		/*plot->xAxis->setRange(0, 100);
-		plot->yAxis->setRange(0, 1000);*/
 
 		plot->replot();
 	}else{

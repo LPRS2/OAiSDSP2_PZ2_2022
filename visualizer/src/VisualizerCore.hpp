@@ -102,10 +102,6 @@ private:
 	std::thread* t;
 
 	vector<QWidget*> q_wins;
-	// TODO use PathMap class
-	// map<string, ImageViewerWithSelecter*> path_to_img_viewer;
-	// map<string, QCustomPlot*> path_to_plot;
-	// map<string, Slider*> path_to_slider;
 	PathMap<QCustomPlot*> path_to_plot;
 	PathMap<Slider*> path_to_slider;
 	PathMap<ImageViewerWithSelecter*> path_to_img_viewer;
